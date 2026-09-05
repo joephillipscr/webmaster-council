@@ -55,10 +55,20 @@ const PILLARS = [
     provides: 'Nielsen heuristic scoring, technical audit, deterministic detector',
     source: 'pbakaus/impeccable',
     repo: 'https://github.com/pbakaus/impeccable.git',
+    // v4.1.x shipped scripts/detect.mjs; v4.2+ replaced it with a compiled engine behind a
+    // scripts/impeccable wrapper, and the repo no longer contains a ready SKILL.md (the
+    // installer generates it from SKILL.src.md). So: raw-copy installs no longer work, and
+    // the detector marker must accept either generation.
+    installNote: [
+      'Impeccable installs via its own installer (a raw copy of the repo no longer works):',
+      '  npx impeccable install',
+      'Run it from any project root; it installs the skill into ~/.claude/skills and',
+      '~/.agents/skills. Then re-run this preflight.',
+    ],
     components: [{
       dir: 'impeccable',
-      repoPath: 'skill',
-      markers: ['reference/critique.md', 'reference/audit.md', 'scripts/detect.mjs'],
+      markers: ['SKILL.md', 'reference/critique.md', 'reference/audit.md'],
+      anyMarkers: ['scripts/detect.mjs', 'scripts/impeccable', 'scripts/impeccable.cmd', 'scripts/bin'],
     }],
   },
   {
@@ -115,10 +125,16 @@ function frontmatterName(dir) {
   } catch { return null; }
 }
 
+function satisfies(dir, component) {
+  if (!component.markers.every((m) => existsSync(join(dir, m)))) return false;
+  if (component.anyMarkers && !component.anyMarkers.some((m) => existsSync(join(dir, m)))) return false;
+  return true;
+}
+
 function locate(component) {
   for (const root of ROOTS) {
     const direct = join(root, component.dir);
-    if (component.markers.every((m) => existsSync(join(direct, m)))) return direct;
+    if (satisfies(direct, component)) return direct;
   }
   for (const root of ROOTS) {
     let entries;
@@ -126,7 +142,7 @@ function locate(component) {
     for (const entry of entries) {
       const candidate = join(root, entry);
       try { if (!statSync(candidate).isDirectory()) continue; } catch { continue; }
-      if (!component.markers.every((m) => existsSync(join(candidate, m)))) continue;
+      if (!satisfies(candidate, component)) continue;
       if (frontmatterName(candidate) === component.dir) return candidate;
     }
   }

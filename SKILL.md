@@ -1,6 +1,6 @@
 ---
 name: webmaster-council
-version: 1.0.0
+version: 1.0.1
 description: Convenes a four-judge design and discoverability council to evaluate a website or app UI, in two layers. Layer 1 sweeps every URL with a deterministic script, counting AI tells like em-dashes, content served hidden at zero opacity, missing alt text, heading, metadata and canonical defects, invalid structured data, and broken links. Layer 2 runs four isolated parallel subagents over one representative of each page template. Judge A (impeccable) scores UX heuristics and technical quality, Judge B (taste-skill) hunts AI-generated design tells, Judge C (Emil Kowalski) reviews motion craft, Judge D (seo-geo-aeo) scores SEO, AI-search and answer-engine readiness. Synthesizes one verdict with prioritized findings and a fix handoff. Use when asked to evaluate, review, critique, audit, grade or diagnose the design, SEO or discoverability of a site, page, or interface.
 ---
 
@@ -263,10 +263,16 @@ Then the judge-specific body:
 >
 > From the project root run `node <SKILLS_ROOT>/impeccable/scripts/context.mjs` once
 > (read-only, it prints context). If it reports `NO_PRODUCT_MD`, proceed using the existing
-> code as evidence. Then run the deterministic detector:
-> `node <SKILLS_ROOT>/impeccable/scripts/detect.mjs --json <markup paths>`.
-> Pass markup files or directories, never CSS-only files. Exit 0 is clean, 2 means findings.
-> Verify every detector finding in context and call out false positives explicitly.
+> code as evidence. Then run the deterministic detector. Its entrypoint depends on the
+> installed impeccable generation, so check which exists:
+> - v4.1.x: `node <SKILLS_ROOT>/impeccable/scripts/detect.mjs --json <markup paths>`
+> - v4.2+: `<SKILLS_ROOT>/impeccable/scripts/impeccable detect --json <markup paths>`
+>   (a wrapper over the compiled engine; on some installs the binary lives under
+>   `scripts/bin/<platform>/impeccable`)
+> When in doubt, the installed `reference/critique.md` names the exact command for its own
+> version; follow that. Pass markup files or directories, never CSS-only files. Exit 0 is
+> clean, 2 means findings. Verify every detector finding in context and call out false
+> positives explicitly.
 >
 > Deliver, in this order:
 > 1. **Surface mode** (Persuade / Operate / Read / Experience) with a one-line reason.
